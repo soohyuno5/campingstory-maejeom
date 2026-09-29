@@ -98,7 +98,8 @@
   <div class="steps">
     <span><b>①</b>내 사이트 번호 누르기</span>
     <span><b>②</b>고른 물건 담고 주문</span>
-    <span><b>③</b>결제는 체크아웃 때 카운터에서</span>
+    <span><b>③</b>주문 끝나면 ◀ 뒤로가기</span>
+    <span><b>④</b>결제는 체크아웃 때 카운터에서</span>
   </div>
   <div class="zones">
     <div class="zone">
@@ -122,10 +123,14 @@
 
 <script>
   // ── 사이트 목록 ─────────────────────────────────────────
-  // QR 받으면 url 칸에 각 사이트의 토스 주문 주소만 넣으면 됩니다.
+  // QR 찍었을 때 나오는 짧은 주소(toss.place/_t/...)를 넣습니다.
+  // 긴 주소(toss-order.../menu)는 QR을 거치지 않아 "QR을 다시 인식해주세요"가 뜨므로 쓰면 안 됨.
+  const QR = {
+    "20": "https://toss.place/_t/qr1bDKteNQr8",
+  };
   const SITES = [
     ...["1","2","3","4","5","6","7","8","9","9-1","10","11","12","13","14","15","16","17","18","19","20","21","22"]
-      .map(label => ({ label, zone: "auto", url: "" })),
+      .map(label => ({ label, zone: "auto", url: QR[label] || "" })),
     { label: "데크1", zone: "deck", url: "" },
     { label: "데크2", zone: "deck", url: "" },
     { label: "데크3", zone: "deck", url: "" },
@@ -160,10 +165,10 @@
   function openSite(s) {
     who.textContent = (s.zone === "auto" ? s.label + "번" : s.label) + " 사이트 주문";
     wrap.innerHTML = "";
+    // 토스 쿠키가 samesite=lax라 iframe 안에서는 "QR을 다시 인식해주세요"가 뜸 → 화면째 이동
     if (s.url) {
-      const f = document.createElement("iframe");
-      f.src = s.url;
-      wrap.appendChild(f);
+      location.href = s.url;
+      return;
     } else {
       wrap.innerHTML =
         '<div class="placeholder">' +
